@@ -1,0 +1,76 @@
+* {
+  outline: 0;
+}
+
+body {
+  margin: 0;
+}
+
+#headBG {
+  background-color: rgba(255, 140, 0, 0.2);
+  padding: 15px 10px;
+}
+
+#container {
+  background-color: #ffffff;
+  padding: 15px;
+  display:inline-block;
+  box-shadow: 1px 1px 1px #000000;
+}
+
+#container label {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+#container input {
+  vertical-align: middle;
+}
+
+#row {
+  display: block;
+  margin-bottom: 15px;
+}
+
+#sizeText {
+  border: none;
+  width: 40px;
+  text-align: center;
+}
+
+.checkbox {
+  margin-left: 15px;
+}
+
+.rgb {
+  width: 40px;
+  text-align: center;
+}
+
+#refresh {
+  margin-left: 15px;
+}
+
+#text, #textbox {
+  font-family: Arial;
+  font-size: 42px;
+  color: rgb(255, 140, 0);
+}
+
+#textbox {
+  border: none;
+  box-shadow: 0 3px 0 #000000;
+}
+
+#textbox:focus {
+  outline: none;
+}
+
+#textContainer {
+  border-top: solid 5px #000000;
+  padding: 15px 0 0 15px;
+}
+
+.hidden {
+  display: none;
+}
