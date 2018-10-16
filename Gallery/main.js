@@ -58,13 +58,39 @@ function clickBox(e) {
     } else {
       el.classList.toggle('expanded')
       text[i].classList.toggle('hideText')
-      console.log(el.style.backgroundImage)
+
+      let url = el.style.backgroundImage.replace(/^url\("(.+)"\)$/, "$1")
+      let element = images.find(function(el) {
+        return el.url === url
+      })
+
+      element.showing = false
       el.classList.length !== 2 && changeImage(el)
-      
     }
   })
 }
 
 window.addEventListener('load', loadImages)
 document.addEventListener('click', clickBox)
+
+
+// delete all below
+
+// function clickBoxFactory (image) {
+
+//   return function clickBox (e) {
+//     // everything in your clickbox fn
+//   }
+// }
+
+// function selectImage () {
+//   return a random image
+// }
+
+// boxes.forEach((box, ) => {
+//   let image = selectImage()
+
+//   box.addEventListener(clickBoxFactory(image))
+// })
+
 

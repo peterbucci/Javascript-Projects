@@ -28,6 +28,12 @@ body {
   top: -40px;
 }
 
+@keyframes fade {
+  to {
+    opacity: 1;
+  }
+}
+
 .box {
   height: 100%;
   width: 25%;
@@ -35,10 +41,11 @@ body {
   background-repeat: no-repeat;
   background-size:cover;
   box-sizing: border-box;
-  /* opacity: 0; */
+  opacity: 0;
   border-right: 1vh solid #000000;
   background-color: rgba(247, 185, 185, 0);
   transition: width 1s, background-image 1s ease-out;
+  animation: fade 2s forwards;
 
 }
 
