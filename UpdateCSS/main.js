@@ -23,7 +23,23 @@ let imageUpload = document.getElementById('imageUpload')
 let image = document.getElementById('image')
 
 function randomQuote() {
-  let quotes = ['one', 'two', 'three', 'four', 'five', 'six']
+  let quotes = [`
+    Jane: Unto ... <br>
+    Daria: Buckle my shoe.
+  `, `
+    Trent: Do you ever feel like you are wasting your life?<br>
+    Daria: Only when I'm awake.
+  `, `
+    Jane: Misery loves company.<br>
+    Daria: You don't have too tell me that. It's the basis of our whole friendship.
+  `, `
+    Daria: Oh, gee. Did I wake you? I guess that means you haven't been murdered. Well, that's good.
+  `, `
+    Helen: Daria, you can't spend the rest of your life in there.<br>
+    Daria: I can once they put in my high-speed internet connection.
+  `, `
+    Daria: I'm overcome with emotion.
+  `]
   text.innerHTML = quotes[Math.floor(Math.random() * Math.floor(quotes.length))]
 }
 
@@ -36,57 +52,48 @@ function updateSizeText() {
   sizeText.value = size.value + 'px'
 }
 
-function updateBold() {
+function updateCheckbox(property, whenChecked, whenUnchecked) {
   if(this.checked) {
-    text.style.fontWeight = 'bold'
-    textbox.style.fontWeight = 'bold'
+    text.style[property] = whenChecked
+    textbox.style[property] = whenChecked
   } else {
-    text.style.fontWeight = 'normal'
-    textbox.style.fontWeight = 'normal'
+    text.style[property] = whenUnchecked
+    textbox.style[property] = whenUnchecked
   }
+}
+
+function updateBold() {
+  updateCheckbox.call(this, 'fontWeight', 'bold', 'normal')
 }
 
 function updateItalic() {
-  if(this.checked) {
-    text.style.fontStyle = 'italic'
-    textbox.style.fontStyle = 'italic'
-  } else {
-    text.style.fontStyle = 'normal'
-    textbox.style.fontStyle = 'normal'
-  }
+  updateCheckbox.call(this, 'fontStyle', 'italic', 'normal')
 }
 
 function updateUnderline() {
-  if(this.checked) {
-    text.style.textDecoration = 'underline'
-    textbox.style.textDecoration = 'underline'
-  } else {
-    text.style.textDecoration = 'none'
-    textbox.style.textDecoration = 'none'
-  }
+  updateCheckbox.call(this, 'textDecoration', 'underline','none')
 }
 
-function updateColor() {
+function updateColors(red, green, blue, redChanged, greenChanged, blueChanged) {
   text.style.color = 'rgb(' + red.value + ',' + green.value + ',' + blue.value + ')'
   textbox.style.color = 'rgb(' + red.value + ',' + green.value + ',' + blue.value + ')'
   text.style.borderColor = 'rgb(' + red.value + ',' + green.value + ',' + blue.value + ')'
   background.style.backgroundColor = 'rgb(' + red.value + ',' + green.value + ',' + blue.value + ', 0.4)'
 
-  redTextBox.value = red.value
-  blueTextBox.value = blue.value
-  greenTextBox.value = green.value
+  redChanged.value = red.value
+  blueChanged.value = blue.value
+  greenChanged.value = green.value
+}
+
+function updateColor() {
+  updateColors(red, blue, green, redTextBox, blueTextBox, greenTextBox)
 }
 
 function updateRgbBox(e) {
-  if (e.currentTarget.value >= 0 && e.currentTarget.value <= 255) {
-    text.style.color = 'rgb(' + redTextBox.value + ',' + greenTextBox.value + ',' + blueTextBox.value + ')'
-    textbox.style.color = 'rgb(' + redTextBox.value + ',' + greenTextBox.value + ',' + blueTextBox.value + ')'
-    text.style.borderColor = 'rgb(' + redTextBox.value + ',' + greenTextBox.value + ',' + blueTextBox.value + ')'
-    background.style.backgroundColor = 'rgb(' + redTextBox.value + ',' + greenTextBox.value + ',' + blueTextBox.value + ', 0.4)'
+  console.log(e.currentTarget.value)
 
-    red.value = redTextBox.value
-    green.value = greenTextBox.value
-    blue.value = blueTextBox.value
+  if (e.currentTarget.value >= 0 && e.currentTarget.value <= 255) {
+    updateColors(redTextBox, blueTextBox, greenTextBox, red, blue, green)
   } else if (e.currentTarget.value < 0) {
     e.currentTarget.value = '0'
   } else (

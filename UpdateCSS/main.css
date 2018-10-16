@@ -4,11 +4,13 @@
 
 body {
   margin: 0;
+  background-color: #f1f1f1;
 }
 
 #headBG {
   background-color: rgba(255, 140, 0, 0.2);
   padding: 15px 10px;
+  box-shadow: 0 1px 5px #000000;
 }
 
 #container {
@@ -16,6 +18,10 @@ body {
   padding: 15px;
   display:inline-block;
   box-shadow: 1px 1px 1px #000000;
+}
+
+#containerRight {
+  float: right;
 }
 
 #container label {
@@ -55,11 +61,13 @@ body {
   font-family: Arial;
   font-size: 42px;
   color: rgb(255, 140, 0);
+  text-shadow: 2px 2px 0 #686868;
 }
 
 #textbox {
   border: none;
   box-shadow: 0 3px 0 #000000;
+  background-color: #f1f1f1;
 }
 
 #textbox:focus {
@@ -67,7 +75,6 @@ body {
 }
 
 #textContainer {
-  border-top: solid 5px #000000;
   padding: 15px 0 0 15px;
 }
 
