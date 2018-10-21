@@ -21,7 +21,7 @@ body {
   color: #d61010;
   text-shadow: 2px 2px 0 #000000;
   transform: translate3D(-50%, -75%, 0);
-  transition: top 1.5s;
+  transition: top 2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .hideText{
@@ -42,10 +42,11 @@ body {
   background-size:cover;
   box-sizing: border-box;
   opacity: 0;
-  border-right: 1vh solid #000000;
+  border-right: 1vh solid #332e2e;
   background-color: rgba(247, 185, 185, 0);
-  transition: width 1s, background-image 1s ease-out;
+  transition: width 1.5s ease-in-out, background-image 1s ease-out;
   animation: fade 2s forwards;
+  box-shadow: inset 5px 5px 10px #000000;
 
 }
 
@@ -60,16 +61,4 @@ body {
 #container {
   display: flex;
   height:100%;
-}
-
-#red {
-}
-
-#green {
-}
-
-#blue {
-}
-
-#orange {
 }
