@@ -17,13 +17,14 @@ html, body {
   height: 10.5vw;
   background-color: yellow;
   position: absolute;
-  top: 0;
+  top: -15vw;
   transition: left 1s, top 1s ease-in;
 	border-radius: 50%;
 	z-index: -1;
 }
 
 #gameBoard {
+	position: relative;
 	border: solid 10px blue;
 	border-radius: 3%;
 	box-shadow: 2px 2px 3px #000;
@@ -46,13 +47,6 @@ html, body {
   height: 10.5vw;
   min-height: 75px;
 	min-width: 75px;
-	border: dotted #000;
-	border-width: 0 1px 0 0;
-	opacity: 0.3;
-}
-
-.box:last-child {
-	border: none;
 }
 
 .square {
