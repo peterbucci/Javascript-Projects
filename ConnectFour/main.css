@@ -75,6 +75,42 @@ html, body {
 	text-align: center;
 }
 
+#afterBoard {
+	display: flex;
+	margin: auto;
+	width: 73.5vw;
+	min-width: 525px;
+	height: 200px;
+}
+
+.playerCard {
+	height: 100%;
+	width: 100%;
+	position: relative;
+	top: 50%;
+	transform: translate3d(0, -50%, 0);
+	text-align: center;
+	border: solid 1px #000000;
+	padding-top: 10px;
+}
+
+.pickAColor {
+	width: 10.5vw;
+  height: 10.5vw;
+  border-radius: 50%;
+  background-color: black;
+	display: inline-block;
+}
+
 .red {
 	background-color: red;
+}
+
+.black {
+	background-color: black;
+}
+
+.pContainer {
+	display: block;
+	margin-bottom: 10px;
 }
