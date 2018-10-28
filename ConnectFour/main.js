@@ -172,12 +172,18 @@ class Game {
 			console.log(game.players[1].name + '\'s' + ' turn')
 			chip.style.backgroundColor = game.players[1].color
 		}
-
-		for (let i = board.length - 1; i >= 0; i--) {
+		
+		this.verticalLoop()
+		this.horizontalLoop()
+		this.diagonalLoop()
+	}
+	
+	verticalLoop () {
+		for (let i = 6; i >= 0; i--) {
 			let duplicates = []
-			let last = board[i].squares[board[i].squares.length - 1].fill
+			let last = board[i].squares[5].fill
 			let count = 0
-			for (let j = board[i].squares.length - 1; j >= 0; j--) {
+			for (let j = 5; j >= 0; j--) {
 				if (last !== board[i].squares[j].fill) {
 					duplicates.push({
 						name: '',
@@ -195,12 +201,114 @@ class Game {
 				last = board[i].squares[j].fill
 			}
 			let results = duplicates.map(el => el.count)
-			if (results.indexOf(3) !== -1) {
+			if (results.indexOf(4) !== -1) {
 				console.log('We have a winner!')
 			} else {
 				console.log('No winner, yet.')
 			}
 		}
+	}
+	
+	horizontalLoop() {
+		for (let i = 5; i >= 0; i--) {
+			let duplicates = []
+			let last = board[0].squares[i].fill
+			let count = 0
+			for (let j = 0; j <= 6; j++) {
+				if (last !== board[j].squares[i].fill) {
+					duplicates.push({
+						name: '',
+						count: count})
+					count = 0
+				}
+				if (board[j].squares[i].fill) {
+					count++
+				}
+				if (j == 6 && count !== 0) {
+					duplicates.push({
+						name: '',
+						count: count})
+				}
+				last = board[j].squares[i].fill
+			}
+			let results = duplicates.map(el => el.count)
+			if (results.indexOf(4) !== -1) {
+				console.log('We have a winner!')
+			} else {
+				console.log('No winner, yet.')
+			}
+		}
+	}
+	
+	diagonalLoop() {
+		let loopOne = [[0,3],[0,4],[0,5],[1,5],[2,5],[3,5]]
+		let loopTwo = [[6,3],[6,4],[6,5],[5,5],[4,5],[3,5]]
+		loopOne.forEach((el) => {
+			let column = el[0]
+			let row = el[1]
+			let duplicates = []
+			let last = board[column].squares[row].fill
+			let count = 0
+			while (row >= 0 && column <= 6) {
+				if (last !== board[column].squares[row].fill) {
+					duplicates.push({
+						name: '',
+						count: count})
+					count = 0
+				}
+				if (board[column].squares[row].fill) {
+					count++
+				}
+				if (row === 0 && count !== 0) {
+					duplicates.push({
+						name: '',
+						count: count})
+				}
+				last = board[column].squares[row].fill
+				column++
+				row--
+			
+			}
+			let results = duplicates.map(el => el.count)
+			if (results.indexOf(4) !== -1) {
+				console.log('We have a winner!')
+			} else {
+				console.log('No winner, yet.')
+			}
+		})
+		loopTwo.forEach((el) => {
+			let column = el[0]
+			let row = el[1]
+			let duplicates = []
+			let last = board[column].squares[row].fill
+			let count = 0
+			while (row >= 0 && column >= 0) {
+				if (last !== board[column].squares[row].fill) {
+					duplicates.push({
+						name: '',
+						count: count})
+					count = 0
+				}
+				if (board[column].squares[row].fill) {
+					count++
+				}
+				if (row === 0 && count !== 0) {
+					duplicates.push({
+						name: '',
+						count: count})
+				}
+				last = board[column].squares[row].fill
+				column--
+				row--
+			
+			}
+			let results = duplicates.map(el => el.count)
+			if (results.indexOf(4) !== -1) {
+				console.log('We have a winner!')
+			} else {
+				console.log('No winner, yet.')
+			}
+		})
 	}
 }
 
