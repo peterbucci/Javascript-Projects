@@ -173,142 +173,154 @@ class Game {
 			chip.style.backgroundColor = game.players[1].color
 		}
 		
-		this.verticalLoop()
-		this.horizontalLoop()
-		this.diagonalLoop()
+		this.loop(5, 6, 'horizontal')
+		this.loop(6, 5, 'vertical')
+		this.diagonalLoop([[0,3],[0,4],[0,5],[1,5],[2,5],[3,5]], [[6,3],[6,4],[6,5],[5,5],[4,5],[3,5]])
 	}
 	
-	verticalLoop () {
-		for (let i = 6; i >= 0; i--) {
+	loop (firstVal, secondVal, orientation) {
+		for (let i = firstVal; i >= 0; i--) {
 			let duplicates = []
-			let last = board[i].squares[5].fill
+			let last = 0
 			let count = 0
-			for (let j = 5; j >= 0; j--) {
-				if (last !== board[i].squares[j].fill) {
+			
+			for (let j = secondVal; j >= 0; j--) {
+				let square
+				orientation === 'vertical' ? (square = board[i].squares[j]) : (square = board[j].squares[i])
+				
+				if (last !== square.fill && last !== 0) {
 					duplicates.push({
-						name: '',
-						count: count})
+					name: '', 
+					count: count
+					})
 					count = 0
 				}
-				if (board[i].squares[j].fill) {
-					count++
-				}
-				if (j == 0 && count !== 0) {
-					duplicates.push({
-						name: '',
-						count: count})
-				}
-				last = board[i].squares[j].fill
+				if (square.fill) {count++}
+				if (j == 0 && count !== 0) {duplicates.push({name: '', count: count})}
+				
+				last = square.fill
 			}
+			
 			let results = duplicates.map(el => el.count)
+			
 			if (results.indexOf(4) !== -1) {
 				console.log('We have a winner!')
 			} else {
 				console.log('No winner, yet.')
 			}
 		}
+		
 	}
 	
-	horizontalLoop() {
-		for (let i = 5; i >= 0; i--) {
-			let duplicates = []
-			let last = board[0].squares[i].fill
-			let count = 0
-			for (let j = 0; j <= 6; j++) {
-				if (last !== board[j].squares[i].fill) {
-					duplicates.push({
-						name: '',
-						count: count})
-					count = 0
+	diagonalLoop(loopOne, loopTwo) {
+		
+		function bothLoops (loop, direction) {
+			loop.forEach((el) => {
+				let column = el[0]
+				let row = el[1]
+				let duplicates = []
+				let last = 0
+				let count = 0
+				//column <= 6 for first loop and column >= 0 second loop
+				while (row >= 0 && column <= 6) {
+					if (last !== board[column].squares[row].fill && last !== 0) {
+						duplicates.push({
+							name: '',
+							count: count})
+						count = 0
+					}
+					if (board[column].squares[row].fill) {
+						count++
+					}
+					if (row === 0 && count !== 0) {
+						duplicates.push({
+							name: '',
+							count: count})
+					}
+					last = board[column].squares[row].fill
+					direction === 'forward' ? column++ : column--
+					row--
+										console.log(column,row)
 				}
-				if (board[j].squares[i].fill) {
-					count++
+				let results = duplicates.map(el => el.count)
+				if (results.indexOf(4) !== -1) {
+					console.log('We have a winner!')
+				} else {
+					console.log('No winner, yet.')
 				}
-				if (j == 6 && count !== 0) {
-					duplicates.push({
-						name: '',
-						count: count})
-				}
-				last = board[j].squares[i].fill
-			}
-			let results = duplicates.map(el => el.count)
-			if (results.indexOf(4) !== -1) {
-				console.log('We have a winner!')
-			} else {
-				console.log('No winner, yet.')
-			}
+			})
 		}
-	}
-	
-	diagonalLoop() {
-		let loopOne = [[0,3],[0,4],[0,5],[1,5],[2,5],[3,5]]
-		let loopTwo = [[6,3],[6,4],[6,5],[5,5],[4,5],[3,5]]
-		loopOne.forEach((el) => {
-			let column = el[0]
-			let row = el[1]
-			let duplicates = []
-			let last = board[column].squares[row].fill
-			let count = 0
-			while (row >= 0 && column <= 6) {
-				if (last !== board[column].squares[row].fill) {
-					duplicates.push({
-						name: '',
-						count: count})
-					count = 0
-				}
-				if (board[column].squares[row].fill) {
-					count++
-				}
-				if (row === 0 && count !== 0) {
-					duplicates.push({
-						name: '',
-						count: count})
-				}
-				last = board[column].squares[row].fill
-				column++
-				row--
+		
+		bothLoops(loopOne, 'forward')
+		bothLoops(loopTwo, 'backwards')
+		
+		
+		// loopOne.forEach((el) => {
+		// 	let column = el[0]
+		// 	let row = el[1]
+		// 	let duplicates = []
+		// 	let last = board[column].squares[row].fill
+		// 	let count = 0
+		// 	while (row >= 0 && column <= 6) {
+		// 		if (last !== board[column].squares[row].fill) {
+		// 			duplicates.push({
+		// 				name: '',
+		// 				count: count})
+		// 			count = 0
+		// 		}
+		// 		if (board[column].squares[row].fill) {
+		// 			count++
+		// 		}
+		// 		if (row === 0 && count !== 0) {
+		// 			duplicates.push({
+		// 				name: '',
+		// 				count: count})
+		// 		}
+		// 		last = board[column].squares[row].fill
+		// 		column++
+		// 		row--
 			
-			}
-			let results = duplicates.map(el => el.count)
-			if (results.indexOf(4) !== -1) {
-				console.log('We have a winner!')
-			} else {
-				console.log('No winner, yet.')
-			}
-		})
-		loopTwo.forEach((el) => {
-			let column = el[0]
-			let row = el[1]
-			let duplicates = []
-			let last = board[column].squares[row].fill
-			let count = 0
-			while (row >= 0 && column >= 0) {
-				if (last !== board[column].squares[row].fill) {
-					duplicates.push({
-						name: '',
-						count: count})
-					count = 0
-				}
-				if (board[column].squares[row].fill) {
-					count++
-				}
-				if (row === 0 && count !== 0) {
-					duplicates.push({
-						name: '',
-						count: count})
-				}
-				last = board[column].squares[row].fill
-				column--
-				row--
+		// 	}
+		// 	let results = duplicates.map(el => el.count)
+		// 	if (results.indexOf(4) !== -1) {
+		// 		console.log('We have a winner!')
+		// 	} else {
+		// 		console.log('No winner, yet.')
+		// 	}
+		// })
+		// loopTwo.forEach((el) => {
+		// 	let column = el[0]
+		// 	let row = el[1]
+		// 	let duplicates = []
+		// 	let last = board[column].squares[row].fill
+		// 	let count = 0
+		// 	while (row >= 0 && column >= 0) {
+		// 		if (last !== board[column].squares[row].fill) {
+		// 			duplicates.push({
+		// 				name: '',
+		// 				count: count})
+		// 			count = 0
+		// 		}
+		// 		if (board[column].squares[row].fill) {
+		// 			count++
+		// 		}
+		// 		if (row === 0 && count !== 0) {
+		// 			duplicates.push({
+		// 				name: '',
+		// 				count: count})
+		// 		}
+		// 		last = board[column].squares[row].fill
+		// 		column--
+		// 		row--
 			
-			}
-			let results = duplicates.map(el => el.count)
-			if (results.indexOf(4) !== -1) {
-				console.log('We have a winner!')
-			} else {
-				console.log('No winner, yet.')
-			}
-		})
+		// 	}
+		// 	let results = duplicates.map(el => el.count)
+		// 	if (results.indexOf(4) !== -1) {
+		// 		console.log('We have a winner!')
+		// 	} else {
+		// 		console.log('No winner, yet.')
+		// 	}
+		// })
 	}
 }
 
