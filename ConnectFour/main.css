@@ -83,7 +83,7 @@ html, body {
 	height: 200px;
 }
 
-.playerCard {
+.createACharacterUI {
 	height: 100%;
 	width: 100%;
 	position: relative;
@@ -102,15 +102,21 @@ html, body {
 	display: inline-block;
 }
 
-.red {
+#red {
 	background-color: red;
 }
 
-.black {
+#black {
 	background-color: black;
 }
 
 .pContainer {
 	display: block;
 	margin-bottom: 10px;
+}
+
+#turnUI {
+	position: absolute;
+	left: 50%;
+	transform: translate3d(-50%, 0, 0);
 }
