@@ -107,6 +107,8 @@ class Player {
 	}
 }
 
+// Look into setting eventlistners like column class
+
 class Game {
 	constructor () {
 		this.players = []
