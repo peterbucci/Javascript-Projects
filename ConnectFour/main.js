@@ -54,15 +54,15 @@ class Column {
 
 				setTimeout(function() {
 					if (game.turn % 2 == 0) {
-						firstAvailable.el.style.backgroundColor = game.players[0].color
-						firstAvailable.fill = 1
-					} else {
 						firstAvailable.el.style.backgroundColor = game.players[1].color
 						firstAvailable.fill = 2
+					} else {
+						firstAvailable.el.style.backgroundColor = game.players[0].color
+						firstAvailable.fill = 1
 					}
-					game.turn++
-					chip.refreshEl()
+					
 					game.takeTurn()
+					chip.refreshEl()
 					game.disabled = false
 				}, 1000)
 			}
@@ -106,7 +106,7 @@ class Chip {
 	}
 
 	appendEl () {
-		game.turn % 2 == 0 ? this.el.style.backgroundColor = game.players[0].color : this.el.style.backgroundColor = game.players[1].color
+		game.turn % 2 == 0 ? this.el.style.backgroundColor = game.players[1].color : this.el.style.backgroundColor = game.players[0].color
 		this.parent.appendChild(this.el)
 		setTimeout(() => {
 			this.el.style.top = '0' 
@@ -176,58 +176,51 @@ class Game {
 			createACharacterUI.insertAdjacentElement('beforeend', containers)
 	
 			if (el.length == 2) {
-				containers.innerHTML = el[0].outerHTML + el[1].outerHTML
+				containers.appendChild(el[0])
+				containers.appendChild(el[1])
 			} else {
-				containers.innerHTML = el.outerHTML || el
+				containers.appendChild(el)
 			}
 		})
-		
-		this.createACharacter = createACharacterUI
-		this.instructions = document.getElementById('instructions')
-		this.nameInput = document.getElementById('nameInput')
-		this.chooseRed = document.getElementById('red')
-		this.chooseBlack = document.getElementById('black')
-	}
 
-	start () {
-		
 		function chooseAColor (e) {
-			let player = new Player(this.nameInput.value, e.target.id)
-			game.players.push(player)
+			let player = new Player(nameInput.value, e.target.id)
+			this.players.push(player)
 			
 			e.target.remove()
-			this.instructions.innerHTML = 'Player Two\'s Name And Color'
-			this.nameInput.setAttribute('value', 'Player Two')
+			instructions.innerHTML = 'Player Two\'s Name And Color'
+			nameInput.setAttribute('value', 'Player Two')
 			
-			if (game.players.length == 2) {
-				game.createACharacter.remove()
+			if (this.players.length == 2) {
+				createACharacterUI.remove()
+				this.takeTurn()
 				chip.appendEl()
 				this.disabled = false
-				game.takeTurn()
 			}
 		}
 
-		this.chooseRed.addEventListener('click', chooseAColor.bind(this))
-		this.chooseBlack.addEventListener('click', chooseAColor.bind(this))
+		chooseRed.addEventListener('click', chooseAColor.bind(this))
+		chooseBlack.addEventListener('click', chooseAColor.bind(this))
 	}
 
 	takeTurn () {
-		
-		if (game.turn % 2 == 0) {
-			this.whoseMove.innerHTML = game.players[0].turn
-		} else {
-			this.whoseMove.innerHTML = game.players[1].turn
-		}
-		
-		this.currentTurn.innerHTML = 'Turn: ' + (game.turn + 1).toString()
-		
 		let a = this.loop(5, 6, 'horizontal')
 		let b = this.loop(6, 5, 'vertical')
 		let c = this.diagonalLoop([[0,3],[0,4],[0,5],[1,5],[2,5],[3,5]], [[6,3],[6,4],[6,5],[5,5],[4,5],[3,5]])
 
 		if (a || b || c) {
 			this.winner()
+		} else {
+			this.turn++
+
+			if (game.turn % 2 == 0) {
+				this.whoseMove.innerHTML = game.players[1].turn
+			} else {
+				this.whoseMove.innerHTML = game.players[0].turn
+			}
+			this.currentTurn.innerHTML = 'Turn: ' + game.turn.toString()
 		}
+
 	}
 	
 	loop (firstVal, secondVal, orientation) {
@@ -329,14 +322,13 @@ class Game {
 	
 	winner () {
 		if (game.turn % 2 == 0) {
-			this.whoseMove.innerHTML = game.players[0].name + ' wins!'
-		} else {
 			this.whoseMove.innerHTML = game.players[1].name + ' wins!'
+		} else {
+			this.whoseMove.innerHTML = game.players[0].name + ' wins!'
 		}
 	}
 }
 
 let game = new Game()
 
-game.start()
 let chip = new Chip(aboveBoard)
