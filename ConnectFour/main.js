@@ -33,34 +33,48 @@ class Column {
 	}
 
 	onMouseEnter () {
-		let chip = document.getElementById('chip')
-		chip.offsetTop == 0 && (chip.style.left = `${10.5 * this.index}vw`)
+		if (!game.disabled) {
+			let chip = document.getElementById('chip')
+			chip.offsetTop == 0 && (chip.style.left = `${10.5 * this.index}vw`)
+		}
 	}
 
 	onClick () {
-	let availableSquares = this.squares.filter(function(square) {
-		return square.fill == 0
-	})
+		let availableSquares = this.squares.filter(function(square) {
+			return square.fill == 0
+		})
+		if (!game.disabled && chip.el.offsetTop == 0 && availableSquares.length > 0) {
+			game.disabled = true
 
-	if (chip.el.offsetTop == 0 && chip.el.offsetLeft == this.el.offsetLeft) {
-		let firstAvailable = availableSquares[availableSquares.length - 1]
-		chip.el.style.top = firstAvailable.el.offsetTop + 'px'
+			function click () {
+				console.log('click')
+				let firstAvailable = availableSquares[availableSquares.length - 1]
+				console.log(firstAvailable.el.offsetTop)
+				chip.el.style.top = firstAvailable.el.offsetTop + chip.el.clientHeight + 'px'
 
-		setTimeout(function() {
-			if (game.turn % 2 == 0) {
-				firstAvailable.el.style.backgroundColor = game.players[0].color
-				firstAvailable.fill = 1
-			} else {
-				firstAvailable.el.style.backgroundColor = game.players[1].color
-				firstAvailable.fill = 2
+				setTimeout(function() {
+					if (game.turn % 2 == 0) {
+						firstAvailable.el.style.backgroundColor = game.players[0].color
+						firstAvailable.fill = 1
+					} else {
+						firstAvailable.el.style.backgroundColor = game.players[1].color
+						firstAvailable.fill = 2
+					}
+					game.turn++
+					chip.refreshEl()
+					game.takeTurn()
+					game.disabled = false
+				}, 1000)
 			}
-			chip.refreshEl()
-			game.turn++
-			game.takeTurn()
-		}, 1000)
-	} else {
-		console.log('moving')
-	}
+
+			if (chip.el.offsetLeft !== this.el.offsetLeft) {
+				chip.el.style.left = `${10.5 * this.index}vw`
+			
+				chip.el.addEventListener('transitionend', click, {once: true})
+			} else {
+				click()
+			}
+		}
 	}
 }
 
@@ -81,6 +95,7 @@ class Chip {
 	refreshEl () {
 		this.el.remove()
 		this.createEl()
+		this.appendEl()
 	}
 
 	createEl () {
@@ -88,16 +103,19 @@ class Chip {
 		el.setAttribute('id', 'chip')
 
 		this.el = el
-		this.moving = false
-		this.parent.appendChild(el)
+	}
+
+	appendEl () {
+		game.turn % 2 == 0 ? this.el.style.backgroundColor = game.players[0].color : this.el.style.backgroundColor = game.players[1].color
+		this.parent.appendChild(this.el)
+		setTimeout(() => {
+			this.el.style.top = '0' 
+			this.el.style.left = '0'
+		}, 100)
 	}
 }
 
-let chip = new Chip(aboveBoard)
-
 // Start Game
-
-
 
 class Player {
 	constructor (name, color, card) {
@@ -113,6 +131,7 @@ class Game {
 	constructor () {
 		this.players = []
 		this.turn = 0
+		this.disabled = true
 		
 		// Game UI (The current turn and whose move it is)
 		
@@ -182,6 +201,8 @@ class Game {
 			
 			if (game.players.length == 2) {
 				game.createACharacter.remove()
+				chip.appendEl()
+				this.disabled = false
 				game.takeTurn()
 			}
 		}
@@ -191,23 +212,22 @@ class Game {
 	}
 
 	takeTurn () {
-		let chip = document.getElementById('chip')
 		
 		if (game.turn % 2 == 0) {
-			chip.style.backgroundColor = game.players[0].color
 			this.whoseMove.innerHTML = game.players[0].turn
 		} else {
-			chip.style.backgroundColor = game.players[1].color
 			this.whoseMove.innerHTML = game.players[1].turn
 		}
 		
-		setTimeout(function(){(chip.style.top = '0', chip.style.left = '0')}, 100)
+		this.currentTurn.innerHTML = 'Turn: ' + (game.turn + 1).toString()
 		
-		this.currentTurn.innerHTML = 'Turn: ' + game.turn.toString()
-		
-		this.loop(5, 6, 'horizontal')
-		this.loop(6, 5, 'vertical')
-		this.diagonalLoop([[0,3],[0,4],[0,5],[1,5],[2,5],[3,5]], [[6,3],[6,4],[6,5],[5,5],[4,5],[3,5]])
+		let a = this.loop(5, 6, 'horizontal')
+		let b = this.loop(6, 5, 'vertical')
+		let c = this.diagonalLoop([[0,3],[0,4],[0,5],[1,5],[2,5],[3,5]], [[6,3],[6,4],[6,5],[5,5],[4,5],[3,5]])
+
+		if (a || b || c) {
+			this.winner()
+		}
 	}
 	
 	loop (firstVal, secondVal, orientation) {
@@ -236,16 +256,17 @@ class Game {
 			let results = duplicates.map(el => el.count)
 			
 			if (results.indexOf(4) !== -1) {
-				this.winner()
+				return true
 			}
 		}
-		
+		return false
 	}
 	
 	diagonalLoop(loopOne, loopTwo) {
 		
 		function bothLoops (loop, direction) {
-			loop.forEach((el) => {
+			for (let i = 0; i < loop.length; i++) {
+				let el = loop[i]
 				let column = el[0]
 				let row = el[1]
 				let duplicates = []
@@ -296,20 +317,26 @@ class Game {
 				let results = duplicates.map(el => el.count)
 				
 				if (results.indexOf(4) !== -1) {
-					this.winner()
+					return true
 				}
-			})
+			}
+			return false
 		}
 		
-		bothLoops(loopOne, 'forward')
-		bothLoops(loopTwo, 'backwards')
+		return bothLoops(loopOne, 'forward') ||
+			bothLoops(loopTwo, 'backwards')
 	}
 	
 	winner () {
-		this.whoseMove.innerHTML = 'We have a winner!'
+		if (game.turn % 2 == 0) {
+			this.whoseMove.innerHTML = game.players[0].name + ' wins!'
+		} else {
+			this.whoseMove.innerHTML = game.players[1].name + ' wins!'
+		}
 	}
 }
 
 let game = new Game()
 
 game.start()
+let chip = new Chip(aboveBoard)
