@@ -11,6 +11,8 @@ class Square {
 		el.setAttribute('class', 'square')
 		this.el = el
 		this.fill = 0
+		this.column
+		this.row
 	}
 }
 
@@ -27,6 +29,8 @@ class Column {
 
 		for (let j = 0; j < 6; j++) {
 			let square = new Square()
+			square.row = j
+			square.column = i
 			this.el.appendChild(square.el)
 			this.squares.push(square)
 		}
@@ -47,9 +51,7 @@ class Column {
 			game.disabled = true
 
 			function click () {
-				console.log('click')
 				let firstAvailable = availableSquares[availableSquares.length - 1]
-				console.log(firstAvailable.el.offsetTop)
 				chip.el.style.top = firstAvailable.el.offsetTop + chip.el.clientHeight + 'px'
 
 				setTimeout(function() {
@@ -61,6 +63,7 @@ class Column {
 						firstAvailable.fill = 1
 					}
 					
+					game.lastMove = firstAvailable
 					game.takeTurn()
 					chip.refreshEl()
 					game.disabled = false
@@ -125,13 +128,12 @@ class Player {
 	}
 }
 
-// Look into setting eventlistners like column class
-
 class Game {
 	constructor () {
 		this.players = []
-		this.turn = 0
+		this.turn = 1
 		this.disabled = true
+		this.lastMove
 		
 		// Game UI (The current turn and whose move it is)
 		
@@ -193,7 +195,10 @@ class Game {
 			
 			if (this.players.length == 2) {
 				createACharacterUI.remove()
-				this.takeTurn()
+
+				this.whoseMove.innerHTML = game.players[0].turn
+	
+				this.currentTurn.innerHTML = 'Turn: ' + game.turn.toString()
 				chip.appendEl()
 				this.disabled = false
 			}
@@ -204,11 +209,24 @@ class Game {
 	}
 
 	takeTurn () {
-		let a = this.loop(5, 6, 'horizontal')
-		let b = this.loop(6, 5, 'vertical')
-		let c = this.diagonalLoop([[0,3],[0,4],[0,5],[1,5],[2,5],[3,5]], [[6,3],[6,4],[6,5],[5,5],[4,5],[3,5]])
 
-		if (a || b || c) {
+		// Win Conditions
+		let results = []
+
+		// Check Vertical Adjacent (Down) NOTE: Chips will obviously never be above the last move
+		results.push(this.checkWinner(false, true, false, false, this.lastMove))
+		// Check Horizontal Adjacent (Left & Right)
+		results.push(this.checkWinner(false, false, true, false, this.lastMove))
+		results.push(this.checkWinner(false, false, false, true, this.lastMove))
+		// Check Diagonal Adjacent (Up Left & Down Right)
+		results.push(this.checkWinner(true, false, true, false, this.lastMove))
+		results.push(this.checkWinner(false, true, false, true, this.lastMove))
+		// Check Diagonal Adjacent (Up Right & Down Left)
+		results.push(this.checkWinner(true, false, false, true, this.lastMove))
+		results.push(this.checkWinner(false, true, true, false, this.lastMove))
+
+		// Check 'Win Conditions' and take your turn if it's false
+		if (results.indexOf(4) !== -1) {
 			this.winner()
 		} else {
 			this.turn++
@@ -218,106 +236,37 @@ class Game {
 			} else {
 				this.whoseMove.innerHTML = game.players[0].turn
 			}
+
 			this.currentTurn.innerHTML = 'Turn: ' + game.turn.toString()
 		}
 
 	}
-	
-	loop (firstVal, secondVal, orientation) {
-		for (let i = firstVal; i >= 0; i--) {
-			let duplicates = []
-			let last = 0
-			let count = 0
-			
-			for (let j = secondVal; j >= 0; j--) {
-				let square
-				orientation === 'vertical' ? (square = board[i].squares[j]) : (square = board[j].squares[i])
-				
-				if (last !== square.fill && last !== 0) {
-					duplicates.push({
-					name: '', 
-					count: count
-					})
-					count = 0
-				}
-				if (square.fill) {count++}
-				if (j == 0 && count !== 0) {duplicates.push({name: '', count: count})}
-				
-				last = square.fill
-			}
-			
-			let results = duplicates.map(el => el.count)
-			
-			if (results.indexOf(4) !== -1) {
-				return true
-			}
-		}
-		return false
-	}
-	
-	diagonalLoop(loopOne, loopTwo) {
-		
-		function bothLoops (loop, direction) {
-			for (let i = 0; i < loop.length; i++) {
-				let el = loop[i]
-				let column = el[0]
-				let row = el[1]
-				let duplicates = []
-				let last = 0
-				let count = 0
-				if (direction === 'forward') {
-					var dirSwitch = true
-				} else {
-					var dirSwitch = false
-				}
 
-				while (row >= 0 && column <= 6 && dirSwitch) {
-					let square = board[column].squares[row]
-					
-					if (last !== square.fill && last !== 0) {
-						duplicates.push({
-							name: '',
-							count: count})
-						count = 0
-					}
-					if (square.fill) {count++}
-					if (row === 0 && count !== 0) {duplicates.push({name: '', count: count})}
-					
-					last = square.fill
-					
-					column++
-					row--
-				}
-				
-				while (row >= 0 && column >= 0 && !dirSwitch) {
-					let square = board[column].squares[row]
-					
-					if (last !== square.fill && last !== 0) {
-						duplicates.push({
-							name: '',
-							count: count})
-						count = 0
-					}
-					if (square.fill) {count++}
-					if (row === 0 && count !== 0) {duplicates.push({name: '', count: count})}
-					
-					last = square.fill
-					
-					column--
-					row--
-				}
-				
-				let results = duplicates.map(el => el.count)
-				
-				if (results.indexOf(4) !== -1) {
-					return true
-				}
-			}
-			return false
+	checkWinner (up, down, left, right, nextSquare, lastMove = this.lastMove, count = 1) {
+
+		if (up && nextSquare) {
+			board[nextSquare.column].squares[nextSquare.row - 1] ? nextSquare = board[nextSquare.column].squares[nextSquare.row - 1] 
+				: nextSquare = null
 		}
-		
-		return bothLoops(loopOne, 'forward') ||
-			bothLoops(loopTwo, 'backwards')
+		if (down && nextSquare) {
+			board[nextSquare.column].squares[nextSquare.row + 1] ? nextSquare = board[nextSquare.column].squares[nextSquare.row + 1]
+				: nextSquare = null
+		}
+		if (left && nextSquare) {
+			board[nextSquare.column - 1] ? nextSquare = board[nextSquare.column - 1].squares[nextSquare.row]
+				: nextSquare = null
+		}
+		if (right && nextSquare) {
+			board[nextSquare.column + 1] ? nextSquare = board[nextSquare.column + 1].squares[nextSquare.row]
+				: nextSquare = null
+		}
+
+		if (nextSquare && nextSquare.fill == lastMove.fill) {
+			count++
+			return this.checkWinner(up, down, left, right, nextSquare, nextSquare, count)
+		}	else {
+			return count
+		}
 	}
 	
 	winner () {
