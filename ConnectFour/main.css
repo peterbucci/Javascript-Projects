@@ -7,51 +7,50 @@ html, body {
 	height: 100%;
 }
 
+.containers {
+  display: flex;
+	flex-flow: column wrap;
+  align-content: flex-start;
+  justify-content: center;
+  margin: 10px auto;
+}
+
+/* Content above the Connect 4 game */
+/* Mostly chip stuff */
+
 #aboveBoard {
-	height: 11vw;
+	height: 10vh;
+	width: 70vh;
+  min-width: 525px;
 	position: relative;
 }
 
 #chip {
-  width: 10.5vw;
-  height: 10.5vw;
+  width: 9vh;
+  height: 9vh;
   background-color: yellow;
   position: absolute;
-  top: -15vw;
+  top: -15vh;
   transition: left 1s, top 1s ease-in;
 	border-radius: 50%;
 	z-index: -1;
 }
+
+/* The Connect 4 game and it's content */
 
 #gameBoard {
 	position: relative;
 	border: solid 10px blue;
 	border-radius: 3%;
 	box-shadow: 2px 2px 3px #000;
-	height: 63vw;
-}
-
-.containers {
-  display: flex;
-	flex-flow: column wrap;
-  align-content: flex-start;
-  justify-content: center;
-	width: 73.5vw;
+	height: 60vh;
+	width: 70vh;
   min-width: 525px;
-  margin: 10px auto;
-}
-
-.box {
-	box-sizing: border-box;
-  width: 10.5vw;
-  height: 10.5vw;
-  min-height: 75px;
-	min-width: 75px;
 }
 
 .square {
-  width: 10.5vw;
-  height: 10.5vw;
+  width: 10vh;
+  height: 10vh;
   min-height: 75px;
   min-width: 75px;
 	overflow: hidden;
@@ -67,47 +66,47 @@ html, body {
 	margin: 7.5%;
 }
 
-.content {
-	position: relative;
-	top: 50%;
-	left: 50%;
-	transform: translate3d(-50%, -50%, 0);
-	text-align: center;
-}
+/* Content after the Connect 4 game */
 
 #afterBoard {
 	display: flex;
 	margin: auto;
-	width: 73.5vw;
+	width: 70vh;
 	min-width: 525px;
-	height: 200px;
 }
 
 .createACharacterUI {
-	height: 100%;
-	width: 100%;
-	position: relative;
-	top: 50%;
-	transform: translate3d(0, -50%, 0);
+	position: absolute;
+	top: 40%;
+	left: 50%;
+	transform: translate3d(-50%, -50%, 0);
 	text-align: center;
 	border: solid 1px #000000;
-	padding-top: 10px;
+	padding: 15px 50px 20px;
+	background-color: #dbdbdb;
+	box-shadow: 1px 1px 5px #424242;
 }
 
 .pickAColor {
-	width: 10.5vw;
-  height: 10.5vw;
+	width: 7vh;
+  height: 7vh;
   border-radius: 50%;
   background-color: black;
 	display: inline-block;
 }
 
+.pickAColor:first-child {
+	margin-right: 10px;
+}
+
 #red {
+	border: solid 1px #000000;
 	background-color: red;
 }
 
 #black {
-	background-color: black;
+	border: solid 1px #000000;
+	background-color: #141414;
 }
 
 .pContainer {
@@ -115,8 +114,29 @@ html, body {
 	margin-bottom: 10px;
 }
 
+#moveUI {
+	width: 25%
+}
+
 #turnUI {
+	width: 75%;
+	text-align: right;
+}
+
+#instructions {
+	font-family: 'Poppins', sans-serif;
+	font-weight: bold;
+	text-transform: uppercase;
+}
+
+#winScreen {
 	position: absolute;
+	top: 40%;
 	left: 50%;
-	transform: translate3d(-50%, 0, 0);
+	transform: translate3d(-50%, -50%, 0);
+	text-align: center;
+	border: solid 1px #000000;
+	padding: 15px 50px 20px;
+	background-color: #dbdbdb;
+	box-shadow: 1px 1px 5px #424242;
 }

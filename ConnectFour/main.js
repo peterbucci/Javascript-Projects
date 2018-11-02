@@ -20,12 +20,13 @@ class Column {
 	constructor (i) {
 		let el = document.createElement('div')
 		el.setAttribute('class', 'column')
-		el.addEventListener('click', this.onClick.bind(this))
-		el.addEventListener('mouseenter', this.onMouseEnter.bind(this))
 
 		this.el = el
 		this.index = i
 		this.squares = []
+
+		this.el.addEventListener('click', this.onClick.bind(this))
+		this.el.addEventListener('mouseenter', this.onMouseEnter.bind(this))
 
 		for (let j = 0; j < 6; j++) {
 			let square = new Square()
@@ -36,10 +37,15 @@ class Column {
 		}
 	}
 
+	removeEvent () {
+			this.el.removeEventListener('click', this.onClick.bind(this))
+			this.el.removeEventListener('mouseenter', this.onMouseEnter.bind(this))
+	}
+
 	onMouseEnter () {
 		if (!game.disabled) {
 			let chip = document.getElementById('chip')
-			chip.offsetTop == 0 && (chip.style.left = `${10.5 * this.index}vw`)
+			chip.offsetTop == 0 && (chip.style.left = `${10 * this.index}vh`)
 		}
 	}
 
@@ -66,12 +72,12 @@ class Column {
 					game.lastMove = firstAvailable
 					game.takeTurn()
 					chip.refreshEl()
-					game.disabled = false
+					!game.over && (game.disabled = false)
 				}, 1000)
 			}
 
 			if (chip.el.offsetLeft !== this.el.offsetLeft) {
-				chip.el.style.left = `${10.5 * this.index}vw`
+				chip.el.style.left = `${10 * this.index}vh`
 			
 				chip.el.addEventListener('transitionend', click, {once: true})
 			} else {
@@ -97,8 +103,8 @@ class Chip {
 
 	refreshEl () {
 		this.el.remove()
-		this.createEl()
-		this.appendEl()
+		!game.over && this.createEl()
+		!game.over && this.appendEl()
 	}
 
 	createEl () {
@@ -115,6 +121,10 @@ class Chip {
 			this.el.style.top = '0' 
 			this.el.style.left = '0'
 		}, 100)
+	}
+
+	deleteEl () {
+		this.el.remove()
 	}
 }
 
@@ -133,6 +143,7 @@ class Game {
 		this.players = []
 		this.turn = 1
 		this.disabled = true
+		this.over = false
 		this.lastMove
 		
 		// Game UI (The current turn and whose move it is)
@@ -144,7 +155,7 @@ class Game {
 		afterBoard.insertAdjacentElement('afterbegin', moveUI)
 		turnUI.setAttribute('id', 'turnUI')
 		afterBoard.insertAdjacentElement('beforeend', turnUI)
-		
+
 		this.whoseMove = moveUI
 		this.currentTurn = turnUI
 		
@@ -156,11 +167,11 @@ class Game {
 	
 		let nameInput = document.createElement('input')
 		nameInput.setAttribute('id', 'nameInput')
-		nameInput.setAttribute('value', 'Player One')
+		nameInput.setAttribute('value', 'Enter A Name')
 		
 		let instructions = document.createElement('span')
 		instructions.setAttribute('id', 'instructions')
-		let text = 'Player One\'s Name And Color'
+		let text = 'Player One'
 		instructions.innerHTML = text
 	
 		let chooseRed = document.createElement('div')
@@ -169,8 +180,11 @@ class Game {
 		chooseRed.setAttribute('id', 'red')
 		chooseBlack.setAttribute('class', 'pickAColor')
 		chooseBlack.setAttribute('id', 'black')
+
+		let submit = document.createElement('button')
+		submit.innerHTML = 'Submit'
 	
-		let construct = [instructions, nameInput, [chooseRed, chooseBlack]]
+		let construct = [instructions, nameInput, [chooseRed, chooseBlack], submit]
 	
 		construct.forEach((el) => {
 			let containers = document.createElement('div')
@@ -185,27 +199,51 @@ class Game {
 			}
 		})
 
-		function chooseAColor (e) {
-			let player = new Player(nameInput.value, e.target.id)
-			this.players.push(player)
-			
-			e.target.remove()
-			instructions.innerHTML = 'Player Two\'s Name And Color'
-			nameInput.setAttribute('value', 'Player Two')
-			
-			if (this.players.length == 2) {
-				createACharacterUI.remove()
+		function addPlayer () {
+			if (this.color && nameInput.value.length > 3) {
+				let player = new Player(nameInput.value, this.color.id)
+				this.players.push(player)
+				
+				this.color.remove()
+				instructions.innerHTML = 'Player Two'
+				nameInput.setAttribute('value', 'Enter A Name')
+				this.color = null
+				
+				if (this.players.length == 2) {
+					createACharacterUI.remove()
 
-				this.whoseMove.innerHTML = game.players[0].turn
-	
-				this.currentTurn.innerHTML = 'Turn: ' + game.turn.toString()
-				chip.appendEl()
-				this.disabled = false
+					this.whoseMove.innerHTML = game.players[0].turn
+		
+					this.currentTurn.innerHTML = 'Turn: ' + game.turn.toString()
+					chip.appendEl()
+					this.disabled = false
+				}
+			}	
+		}
+
+		this.color = null
+
+		function chooseAColor (e) {
+			if (e.target.style.boxShadow === 'rgb(66, 66, 66) 5px 5px 5px') {
+				e.target.style.boxShadow = 'none'
+				this.color = null
+			} else {
+				this.color = e.target
+				this.color.style.boxShadow = 'rgb(66, 66, 66) 5px 5px 5px'
+				this.color.id === 'red' && this.color.nextSibling && (this.color.nextSibling.style.boxShadow = 'none')
+				this.color.id === 'black' && this.color.previousSibling && (this.color.previousSibling.style.boxShadow = 'none')
 			}
 		}
 
 		chooseRed.addEventListener('click', chooseAColor.bind(this))
 		chooseBlack.addEventListener('click', chooseAColor.bind(this))
+
+		submit.addEventListener('click', addPlayer.bind(this))
+
+		// Win Screen
+		this.winScreen = document.createElement('div')
+		this.winScreen.setAttribute('id', 'winScreen')
+
 	}
 
 	takeTurn () {
@@ -272,9 +310,13 @@ class Game {
 	winner () {
 		if (game.turn % 2 == 0) {
 			this.whoseMove.innerHTML = game.players[1].name + ' wins!'
+			this.winScreen.innerHTML = game.players[1].name + ' wins!'
 		} else {
 			this.whoseMove.innerHTML = game.players[0].name + ' wins!'
+			this.winScreen.innerHTML = game.players[1].name + ' wins!'
 		}
+		afterBoard.insertAdjacentElement('beforeend', this.winScreen)
+		this.over = true
 	}
 }
 
