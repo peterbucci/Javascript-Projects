@@ -298,19 +298,14 @@ class Game {
 		} else {
 			this.turn++
 
-			if (game.turn % 2 == 0) {
-				this.moveUI.innerHTML = game.players[1].turn
-			} else {
-				this.moveUI.innerHTML = game.players[0].turn
-			}
-
+			game.turn % 2 == 0 ? this.moveUI.innerHTML = game.players[1].turn : this.moveUI.innerHTML = game.players[0].turn
 			this.turnUI.innerHTML = 'Turn: ' + game.turn.toString()
 		}
 
 	}
 
 	checkWinner (up, down, left, right, nextSquare, lastMove = this.lastMove, count = 1) {
-
+		
 		if (up && nextSquare) {
 			this.board[nextSquare.column].squares[nextSquare.row - 1] ? nextSquare = this.board[nextSquare.column].squares[nextSquare.row - 1] 
 				: nextSquare = null

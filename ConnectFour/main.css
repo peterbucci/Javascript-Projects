@@ -26,8 +26,8 @@ html, body {
 }
 
 #chip {
-  width: 9vh;
-  height: 9vh;
+  width: 10vh;
+  height: 10vh;
   background-color: yellow;
   position: absolute;
   top: -15vh;
