@@ -1,7 +1,4 @@
-// Create Gameboard
-let aboveBoard = document.getElementById('aboveBoard')
-let gameBoard = document.getElementById('gameBoard')
-let afterBoard = document.getElementById('afterBoard')
+// Create Game board
 
 class Square {
 	constructor () {
@@ -57,15 +54,17 @@ class Column {
 						firstAvailable.el.style.backgroundColor = game.players[1].color
 						firstAvailable.fill = 2
 						game.chip.deleteEl()
-						game.chip = new Chip(aboveBoard, game.players[0].color)
+						game.chip = new Chip(game.players[0].color)
 					} else {
 						firstAvailable.el.style.backgroundColor = game.players[0].color
 						firstAvailable.fill = 1
 						game.chip.deleteEl()
-						game.chip = new Chip(aboveBoard, game.players[1].color)
+						game.chip = new Chip(game.players[1].color)
 					}
 					
 					game.lastMove = firstAvailable
+					game.moves.push(firstAvailable)
+					console.log(game.moves)
 					game.takeTurn()
 					!game.over && (game.disabled = false)
 				}, 1000)
@@ -85,17 +84,18 @@ class Column {
 // Create Chip
 
 class Chip {
-	constructor (parent, color) {
-		this.parent = parent
+	constructor (color) {
+		this.parent = document.getElementById('aboveBoard')
 		this.createEl(color)
 	}
 
 	createEl (color) {
-		let el = document.createElement('div')
-		el.setAttribute('id', 'chip')
-		this.el = el
+		this.el = document.createElement('div')
+
+		this.el.setAttribute('id', 'chip')
 		this.parent.appendChild(this.el)
 		this.el.style.backgroundColor = color
+
 		setTimeout(() => {
 			this.el.style.top = '0' 
 			this.el.style.left = '0'
@@ -121,6 +121,7 @@ class Game {
 	constructor () {
 		this.players = []
 		this.turn = 1
+		this.moves= []
 		this.lastMove
 		this.chip
 		// If true, disable event listener functions
@@ -128,12 +129,14 @@ class Game {
 		// If true, game is over
 		this.over = false
 		
+		this.UI = document.getElementById('afterBoard')
 		this.toggleBoard()
 		this.toggleGameUI()
 		this.toggleCreateACharacterUI()
 	}
 
 	toggleBoard () {
+		let gameBoard = document.getElementById('gameBoard')
 
 		if (!this.board) {
 			this.board = []
@@ -153,7 +156,7 @@ class Game {
 		if (!this.createACharacterUI) {
 			this.createACharacterUI = document.createElement('div')
 			this.createACharacterUI.setAttribute('class', 'createACharacterUI')
-			afterBoard.insertAdjacentElement('beforeend', this.createACharacterUI)
+			this.UI.insertAdjacentElement('beforeend', this.createACharacterUI)
 
 			let title = document.createElement('span')
 			title.setAttribute('id', 'title')
@@ -215,7 +218,7 @@ class Game {
 						this.moveUI.innerHTML = game.players[0].turn
 			
 						this.turnUI.innerHTML = 'Turn: ' + game.turn.toString()
-						this.chip = new Chip(aboveBoard, this.players[0].color)
+						this.chip = new Chip(this.players[0].color)
 						this.disabled = false
 					}
 				}	
@@ -250,9 +253,9 @@ class Game {
 			this.turnUI = document.createElement('div')
 			
 			this.moveUI.setAttribute('id', 'moveUI')
-			afterBoard.insertAdjacentElement('afterbegin', this.moveUI)
+			this.UI.insertAdjacentElement('afterbegin', this.moveUI)
 			this.turnUI.setAttribute('id', 'turnUI')
-			afterBoard.insertAdjacentElement('beforeend', this.turnUI)
+			this.UI.insertAdjacentElement('beforeend', this.turnUI)
 		} else {
 			this.moveUI.remove()
 			this.turnUI.remove()
@@ -280,17 +283,10 @@ class Game {
 		// Win Conditions
 		let results = []
 
-		// Check Vertical Adjacent (Down) NOTE: Chips will obviously never be above the last move
-		results.push(this.checkWinner(false, true, false, false, this.lastMove))
-		// Check Horizontal Adjacent (Left & Right)
-		results.push(this.checkWinner(false, false, true, false, this.lastMove))
-		results.push(this.checkWinner(false, false, false, true, this.lastMove))
-		// Check Diagonal Adjacent (Up Left & Down Right)
-		results.push(this.checkWinner(true, false, true, false, this.lastMove))
-		results.push(this.checkWinner(false, true, false, true, this.lastMove))
-		// Check Diagonal Adjacent (Up Right & Down Left)
-		results.push(this.checkWinner(true, false, false, true, this.lastMove))
-		results.push(this.checkWinner(false, true, true, false, this.lastMove))
+		results.push(this.checkWinner('down', null))
+		results.push(this.checkWinner(null, 'left') + this.checkWinner(null, 'right') - 1)
+		results.push (this.checkWinner('up', 'left') + this.checkWinner('down', 'right') - 1)
+		results.push (this.checkWinner('up', 'right') + this.checkWinner('down', 'left') - 1)
 
 		// Check 'Win Conditions' and take your turn if it's false
 		if (results.indexOf(4) !== -1) {
@@ -304,28 +300,27 @@ class Game {
 
 	}
 
-	checkWinner (up, down, left, right, nextSquare, lastMove = this.lastMove, count = 1) {
-		
-		if (up && nextSquare) {
-			this.board[nextSquare.column].squares[nextSquare.row - 1] ? nextSquare = this.board[nextSquare.column].squares[nextSquare.row - 1] 
-				: nextSquare = null
+	checkWinner (vertical, horizontal, lastSquare = this.lastMove, count = 1, moveForward = true) {
+		let currentSquare = lastSquare
+	
+		if (vertical === 'up' && this.board[currentSquare.column].squares[currentSquare.row - 1]) {
+			currentSquare = this.board[currentSquare.column].squares[currentSquare.row - 1]
+		} else if (vertical === 'down' && this.board[currentSquare.column].squares[currentSquare.row + 1] ) {
+			currentSquare = this.board[currentSquare.column].squares[currentSquare.row + 1]
+		} else if (vertical) {
+			moveForward = false
 		}
-		if (down && nextSquare) {
-			this.board[nextSquare.column].squares[nextSquare.row + 1] ? nextSquare = this.board[nextSquare.column].squares[nextSquare.row + 1]
-				: nextSquare = null
-		}
-		if (left && nextSquare) {
-			this.board[nextSquare.column - 1] ? nextSquare = this.board[nextSquare.column - 1].squares[nextSquare.row]
-				: nextSquare = null
-		}
-		if (right && nextSquare) {
-			this.board[nextSquare.column + 1] ? nextSquare = this.board[nextSquare.column + 1].squares[nextSquare.row]
-				: nextSquare = null
+		if (horizontal === 'left' && this.board[currentSquare.column - 1]) {
+			currentSquare = this.board[currentSquare.column - 1].squares[currentSquare.row]
+		} else if (horizontal === 'right' && this.board[currentSquare.column + 1]) {
+			currentSquare = this.board[currentSquare.column + 1].squares[currentSquare.row]
+		} else if (horizontal) {
+			moveForward = false
 		}
 
-		if (nextSquare && nextSquare.fill == lastMove.fill) {
+		if (moveForward && currentSquare.fill == lastSquare.fill) {
 			count++
-			return this.checkWinner(up, down, left, right, nextSquare, nextSquare, count)
+			return this.checkWinner(vertical, horizontal, currentSquare, count)
 		}	else {
 			return count
 		}
@@ -339,7 +334,7 @@ class Game {
 			this.moveUI.innerHTML = game.players[0].name + ' wins!'
 			this.toggleWinScreen(game.players[0].name)
 		}
-		afterBoard.insertAdjacentElement('beforeend', this.winScreen)
+		this.UI.insertAdjacentElement('beforeend', this.winScreen)
 		this.over = true
 	}
 
