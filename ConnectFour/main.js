@@ -62,10 +62,7 @@ class Column {
 						game.chip = new Chip(game.players[1].color)
 					}
 					
-					game.lastMove = firstAvailable
-					game.moves.push(firstAvailable)
-					console.log(game.moves)
-					game.takeTurn()
+					game.takeTurn(firstAvailable)
 					!game.over && (game.disabled = false)
 				}, 1000)
 			}
@@ -117,13 +114,24 @@ class Player {
 	}
 }
 
+class Move {
+	constructor (move, time) {
+		this.square = move
+		if (game.moves.length == 0) {
+			this.timeSpent = time - game.startTime
+			this.time = time
+		} else {
+			this.timeSpent = time - game.moves[game.moves.length - 1].time
+			this.time = time
+		}
+	}
+}
+
 class Game {
 	constructor () {
 		this.players = []
 		this.turn = 1
 		this.moves= []
-		this.lastMove
-		this.chip
 		// If true, disable event listener functions
 		this.disabled = true
 		// If true, game is over
@@ -218,6 +226,8 @@ class Game {
 						this.moveUI.innerHTML = game.players[0].turn
 			
 						this.turnUI.innerHTML = 'Turn: ' + game.turn.toString()
+						let date = new Date()
+						this.startTime = date.getTime()
 						this.chip = new Chip(this.players[0].color)
 						this.disabled = false
 					}
@@ -271,14 +281,25 @@ class Game {
 			newGame.setAttribute('id', 'newGame')
 			newGame.innerHTML = 'New Game'
 			this.winScreen.insertAdjacentElement('beforeend', newGame)
+			let replay = document.createElement('button')
+			replay.setAttribute('id', 'replay')
+			replay.innerHTML = 'View Replay'
+			this.winScreen.insertAdjacentElement('beforeend', replay)
 	
-			this.winScreen.addEventListener('click', this.newGame.bind(this))
+			newGame.addEventListener('click', this.newGame.bind(this))
+			replay.addEventListener('click', this.replay.bind(this))
 		} else {
 			this.winScreen.remove()
 		}
 	}
 
-	takeTurn () {
+	takeTurn (move) {
+		let date = new Date()
+		let time = date.getTime()
+		this.lastMove = new Move(move, time)
+		this.moves.push(this.lastMove)
+		
+		console.log(this.moves)
 
 		// Win Conditions
 		let results = []
@@ -294,13 +315,13 @@ class Game {
 		} else {
 			this.turn++
 
-			game.turn % 2 == 0 ? this.moveUI.innerHTML = game.players[1].turn : this.moveUI.innerHTML = game.players[0].turn
-			this.turnUI.innerHTML = 'Turn: ' + game.turn.toString()
+			this.turn % 2 == 0 ? this.moveUI.innerHTML = this.players[1].turn : this.moveUI.innerHTML = this.players[0].turn
+			this.turnUI.innerHTML = 'Turn: ' + this.turn.toString()
 		}
 
 	}
 
-	checkWinner (vertical, horizontal, lastSquare = this.lastMove, count = 1, moveForward = true) {
+	checkWinner (vertical, horizontal, lastSquare = this.lastMove.square, count = 1, moveForward = true) {
 		let currentSquare = lastSquare
 	
 		if (vertical === 'up' && this.board[currentSquare.column].squares[currentSquare.row - 1]) {
@@ -344,6 +365,35 @@ class Game {
 		this.toggleWinScreen()
 		this.chip.deleteEl()
 		game = new Game()
+	}
+	
+	replay () {
+		this.board.forEach((column) => {
+			column.squares.forEach((square) => {
+				square.el.style.backgroundColor = 'white'
+			})
+		})
+		
+		this.chip.deleteEl()
+		this.chip = new Chip(this.players[0].color)
+		
+		for (let i = 0; i < this.moves.length; i++) {
+			console.log(this.moves[i].square.el.offsetTop + 'px')
+			this.chip.el.style.top = this.moves[i].square.el.offsetTop + 'px'
+			this.chip.el.style.left = this.moves[i].square.el.offsetLeft + 'px'
+			this.chip.el.addEventListener('transitionend', function () {
+				if (i % 2 == 0) {
+					this.moves[i].square.el.style.backgroundColor = this.chip.el.style.backgroundColor
+					this.chip.deleteEl()
+					this.chip = new Chip(this.players[1].color)
+				} else {
+					this.moves[i].square.el.style.backgroundColor = this.chip.el.style.backgroundColor
+					this.chip.deleteEl()
+					this.chip = new Chip(this.players[0].color)
+				}
+			}.bind(this))
+
+		}
 	}
 }
 
