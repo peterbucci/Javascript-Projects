@@ -147,6 +147,10 @@ html, body {
 	margin-top: 10px;
 }
 
+#replay {
+	margin-top: 5px;
+}
+
 #title {
 	position: relative;
 	left: 15px;
