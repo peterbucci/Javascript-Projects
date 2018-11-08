@@ -50,6 +50,7 @@ class Column {
 				game.chip.el.style.top = firstAvailable.el.offsetTop + game.chip.el.clientHeight + 'px'
 
 				setTimeout(function() {
+					let chipColor = game.chip.el.style.backgroundColor
 					if (game.turn % 2 == 0) {
 						firstAvailable.el.style.backgroundColor = game.players[1].color
 						firstAvailable.fill = 2
@@ -62,7 +63,7 @@ class Column {
 						game.chip = new Chip(game.players[1].color)
 					}
 					
-					game.takeTurn(firstAvailable)
+					game.takeTurn(firstAvailable, chipColor)
 					!game.over && (game.disabled = false)
 				}, 1000)
 			}
@@ -115,14 +116,16 @@ class Player {
 }
 
 class Move {
-	constructor (move, time) {
+	constructor (move, time, chipColor) {
 		this.square = move
 		if (game.moves.length == 0) {
 			this.timeSpent = time - game.startTime
 			this.time = time
+			this.chipColor = chipColor
 		} else {
 			this.timeSpent = time - game.moves[game.moves.length - 1].time
 			this.time = time
+			this.chipColor = chipColor
 		}
 	}
 }
@@ -293,10 +296,10 @@ class Game {
 		}
 	}
 
-	takeTurn (move) {
+	takeTurn (move, chipColor) {
 		let date = new Date()
 		let time = date.getTime()
-		this.lastMove = new Move(move, time)
+		this.lastMove = new Move(move, time, chipColor)
 		this.moves.push(this.lastMove)
 		
 		console.log(this.moves)
@@ -370,30 +373,50 @@ class Game {
 	replay () {
 		this.board.forEach((column) => {
 			column.squares.forEach((square) => {
-				square.el.style.backgroundColor = 'white'
+				square.el.style.backgroundColor = 'transparent'
 			})
 		})
 		
 		this.chip.deleteEl()
-		this.chip = new Chip(this.players[0].color)
-		
-		for (let i = 0; i < this.moves.length; i++) {
-			console.log(this.moves[i].square.el.offsetTop + 'px')
-			this.chip.el.style.top = this.moves[i].square.el.offsetTop + 'px'
-			this.chip.el.style.left = this.moves[i].square.el.offsetLeft + 'px'
-			this.chip.el.addEventListener('transitionend', function () {
-				if (i % 2 == 0) {
-					this.moves[i].square.el.style.backgroundColor = this.chip.el.style.backgroundColor
-					this.chip.deleteEl()
-					this.chip = new Chip(this.players[1].color)
-				} else {
-					this.moves[i].square.el.style.backgroundColor = this.chip.el.style.backgroundColor
-					this.chip.deleteEl()
-					this.chip = new Chip(this.players[0].color)
-				}
-			}.bind(this))
+		let i = 0
 
+		var move
+		var drop
+		var change
+		createChip()
+
+		function createChip() {
+			game.chip = new Chip(game.moves[i].chipColor)
+			let timer = game.moves[i].timeSpent
+			if (game.moves[i].square.el.offsetLeft !== 0) {
+				move = setInterval(moveChip, timer - 2000)
+			} else {
+				drop = setInterval(dropChip, timer - 1000)
+			}
 		}
+
+		function moveChip() {
+			clearInterval(move)
+			game.chip.el.style.left = `${10 * game.moves[i].square.column}vh`
+			drop = setInterval(dropChip, 1000)
+		}
+
+		function dropChip() {
+			clearInterval(drop)
+			game.chip.el.style.top = game.moves[i].square.el.offsetTop + game.chip.el.clientHeight + 'px'
+			change = setInterval(changeBackground, 1000)
+		}
+
+		function changeBackground () {
+			clearInterval(change)
+			game.moves[i].square.el.style.backgroundColor = game.moves[i].chipColor
+			game.chip.deleteEl()
+			i++
+			if (i !== game.moves.length) {
+				createChip()
+			}
+		}
+
 	}
 }
 
